@@ -17,6 +17,14 @@ pool.end();
 });
 */
 
+var timestamp = new Date();
+var date = timestamp.getDate();
+var month = timestamp.getMonth(); 
+var year = timestamp.getFullYear();
+
+//var noww = new Date();
+
+//noww = now.format("dd-MM-yyyy hh:mm:ss TT");
 
 app.get('/', (req, res) => {
  res.sendFile(path.join(__dirname + '/index.html'))
@@ -97,7 +105,7 @@ async function createTableReview() {
 
 
 
-//insertRestaurant("Tacoloco", "oslo", "taco", "godt", "1999-01-08 04:05:06", "1999-01-08 04:05:06", 1, 1 )
+//insertRestaurant("Tacoloco", "oslo", "taco", "godt", timestamp, timestamp, 1, 1 )
 
 async function insertRestaurant(name,address,category,description, createdAt, updatedAt, active, userID) {
     try {
@@ -112,7 +120,7 @@ async function insertRestaurant(name,address,category,description, createdAt, up
 }
 
 
-//insertReview(4.2, "verii good, very najs", "1999-01-08 04:05:06","1999-01-08 04:05:06", 1, 1, 2)
+//insertReview(4.2, "verii good, very najs", timestamp,timestamp, 1, 1, 2)
 
 async function insertReview(rating, reviewText, created_at, updated_at, active, user_id, restaurant_id) {
     try {
@@ -126,7 +134,7 @@ async function insertReview(rating, reviewText, created_at, updated_at, active, 
     }
 }
 
-//insertUser("Username", "leeeet1337@mail", "bestpassord", 1, "1999-01-08 04:05:06", "1999-01-08 04:05:06", 1 )
+//insertUser("Username", "leeeet1337@mail", "bestpassord", 1, timestamp, timestamp, 1 )
 
 async function insertUser(username,email,password, role, created_at, updated_at, active) {
     try {
