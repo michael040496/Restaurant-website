@@ -1,18 +1,17 @@
-
-import bodyParser from 'body-parser';
 import router from './routes/index.js';
 
-
-
-var express = require('express'),
-app = express(),
-port = process.env.PORT || 3000;
-app.listen(port);
-app.use(bodyParser.json());
+const bodyParser = require('body-parser')
+const express = require('express')
+const app = express()
+//const db = require('./models/db.js/')
+const port = 3000
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(router);
 
-console.log('todo list RESTful API server started on: ' + port);
+app.get('/', (request, response) => {
+  response.json({ info: 'Node.js, Express, and Postgres API' })
+})
 
-//get all todolists
-
+app.listen(port, () => {
+  console.log(`App running on port ${port}.`)
+})
