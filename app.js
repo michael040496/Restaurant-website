@@ -1,17 +1,27 @@
+import router from './router/routes.js';
+
 const express = require('express');
+
+//import pool from "./db";
+const bodyParser = require('body-parser')
 //const pg = require('pg')
 var app = express();
 var path = require('path');
 const maketables = require('./maketables.js');
 const insertinto = require('./insertinto.js');
+
+
+//const router = require('./router/routes.js');
+const pool = require('./db.js');
 //var pets = require('./pet.json');
 app.use(express.static('resources'));
 
-const { Pool } = require('pg');
-const pool = new Pool({
-    connectionString: 'postgres://aanougfckieono:d9ce13b420528808525a59abd103d40908d26f195910a09712e14d748ddb7f28@ec2-54-247-85-251.eu-west-1.compute.amazonaws.com:5432/d78t1br827i6e',
-    ssl: true
-});
+
+
+//var rout = {dest:'./router/routes.js'};
+
+app.use(router);
+
 
 /*pool.query("SELECT NOW()", (err, res) => {
 console.log(err, res);
@@ -38,22 +48,12 @@ function populate(){
 
 
 
-
-
-
-//var noww = new Date();
-
-//noww = now.format("dd-MM-yyyy hh:mm:ss TT");
-//createAllTables();
-
-
 function createAllTables(){
     maketables.createTableRestaurant();
     maketables.createTableReview();
     maketables.createTableUsers();
     maketables.alterTableRestaurant();
     maketables.alterTableReview();
-    
 }
 
 
@@ -78,6 +78,49 @@ app.get('/review', async(req, res) => {
     res.json(data);
 });
 
+
+
+app.get('/user/:id', async(req, res) => {
+    
+    let id = parseInt(req.params.id);
+    let data = await getDataID("users", "user_id", id);
+    res.json(data);
+});
+
+app.get('/review/:id', async(req, res) => {
+    
+    let id = parseInt(req.params.id);
+    let data = await getDataID("review", "review_id", id);
+    res.json(data);
+});
+
+app.get('/restaurant/:id', async(req, res) => {
+    
+    let id = parseInt(req.params.id);
+    let data = await getDataID("restaurant", "restaurant_id", id);
+    res.json(data);
+});
+
+
+
+    
+async function getDataID(table,table_id,id) {
+    let data;
+    try {
+      const client = await pool.connect()
+      const result = await client.query('SELECT * FROM ' + table + ' WHERE ' + table_id + '= ' + id);
+      data = { 'results': (result) ? result.rows : null }['results'];
+      client.release();
+      console.log(data);
+      return data;
+    } catch (err) {
+      console.error(err);
+      res.send("Error " + err);
+    }
+}
+ 
+
+
 async function getData(table) {
     let data;
     try {
@@ -99,13 +142,8 @@ app.get('/data', (req, res) => {
 });
 
 
-
 app.use("/static",
         express.static('resources'));
 
 app.listen(process.env.PORT || 8080)
 
-
-module.exports = {
-    pool
-}
