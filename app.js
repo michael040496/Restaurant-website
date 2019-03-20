@@ -2,6 +2,8 @@ const express = require('express');
 //const pg = require('pg')
 var app = express();
 var path = require('path');
+const maketables = require('./maketables.js');
+const insertinto = require('./insertinto.js');
 //var pets = require('./pet.json');
 app.use(express.static('resources'));
 
@@ -17,14 +19,45 @@ pool.end();
 });
 */
 
-var timestamp = new Date();
-var date = timestamp.getDate();
-var month = timestamp.getMonth(); 
-var year = timestamp.getFullYear();
+
+//populate();
+function populate(){
+    //insertRestaurant("Tacoloco", "oslo", "taco", "godt", timestamp, timestamp, 1, 1 )
+    insertinto.insertRestaurant("Michaels Fruits and Brewings", "Ethiopia", "Diner", "Schmaker godt", 1, 3 )
+    insertinto.insertRestaurant("Philippes Guns", "Spania", "Drinks", "Smeller bra", 1, 1 )
+    insertinto.insertRestaurant("Barteks Moussli", "Polen", "Diner", "Alt mousserende", 1, 2 )
+    
+    insertinto.insertReview("4.6", "yaya not baaad", 1, 1, 1)
+    insertinto.insertReview("1.1", "too moussy", 1, 1, 3)
+    insertinto.insertReview("3.6", "very veggy", 1, 2, 2)
+    
+    insertinto.insertUser("Michaelooo", "veggie4lyfe@mail", "melon", 1, 1 )
+    insertinto.insertUser("Philippeloo", "gunsandtattooes@mail", "ak47", 1, 1 )
+    insertinto.insertUser("Bartekeloo", "1337@mail", "leet", 1, 1 )
+}
+
+
+
+
+
 
 //var noww = new Date();
 
 //noww = now.format("dd-MM-yyyy hh:mm:ss TT");
+//createAllTables();
+
+
+function createAllTables(){
+    maketables.createTableRestaurant();
+    maketables.createTableReview();
+    maketables.createTableUsers();
+    maketables.alterTableRestaurant();
+    maketables.alterTableReview();
+    
+}
+
+
+
 
 app.get('/', (req, res) => {
  res.sendFile(path.join(__dirname + '/index.html'))
@@ -45,7 +78,6 @@ app.get('/review', async(req, res) => {
     res.json(data);
 });
 
-
 async function getData(table) {
     let data;
     try {
@@ -62,93 +94,6 @@ async function getData(table) {
 }
 
 
-
-//createTableRestaurant();
-async function createTableRestaurant() {
-        try {
-        const client = await pool.connect()
-        
-        const result = await client.query('CREATE TABLE restaurant(restaurant_id SERIAL PRIMARY KEY, name VARCHAR(128) NOT NULL, address TEXT, category VARCHAR(255), description TEXT, created_at TIMESTAMP, updated_at TIMESTAMP, active SMALLINT, user_id INT, FOREIGN KEY (user_id) REFERENCES users (user_id), FOREIGN KEY (restaurant_id) REFERENCES review (review_id))');
-        //data = { 'results': (result) ? result.rows : null }['results'];
-        client.release();
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-
-//createTableUsers();
-async function createTableUsers() {
-        try {
-        const client = await pool.connect()
-        
-        const result = await client.query("CREATE TABLE IF NOT EXISTS users ( user_id SERIAL PRIMARY KEY, username VARCHAR(128) NOT NULL, email VARCHAR(128), password VARCHAR(20), role SMALLINT, created_at TIMESTAMP, updated_at TIMESTAMP, active SMALLINT )");
-        //data = { 'results': (result) ? result.rows : null }['results'];
-        client.release();
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-//createTableReview();
-async function createTableReview() {
-        try {
-        const client = await pool.connect()
-        
-        const result = await client.query("CREATE TABLE IF NOT EXISTS review ( review_id SERIAL PRIMARY KEY, rating DECIMAL(2) NOT NULL, reviewText TEXT,  created_at TIMESTAMP, updated_at TIMESTAMP, active SMALLINT, user_id INT REFERENCES users(user_id) ON DELETE CASCADE, restaurant_id INT REFERENCES restaurant(restaurant_id) ON DELETE CASCADE)");
-        //data = { 'results': (result) ? result.rows : null }['results'];
-        client.release();
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-
-
-//insertRestaurant("Tacoloco", "oslo", "taco", "godt", timestamp, timestamp, 1, 1 )
-
-async function insertRestaurant(name,address,category,description, createdAt, updatedAt, active, userID) {
-    try {
-        const client = await pool.connect()
-        const result = await client.query('INSERT INTO restaurant (name,address,category,description, created_at, updated_at, active, user_id)  VALUES($1,$2,$3,$4,$5,$6,$7,$8)', [name,address,category,description, createdAt, updatedAt, active, userID]);
-        console.log("Inserting restaurant, successfully.");
-        client.release();
-    } catch (err) {
-        console.log("Inserting restaurant, failed.");
-        console.error(err);
-    }
-}
-
-
-//insertReview(4.2, "verii good, very najs", timestamp,timestamp, 1, 1, 2)
-
-async function insertReview(rating, reviewText, created_at, updated_at, active, user_id, restaurant_id) {
-    try {
-        const client = await pool.connect()
-        const result = await client.query('INSERT INTO review (rating, reviewText, created_at, updated_at, active, user_id, restaurant_id)  VALUES($1,$2,$3,$4,$5,$6,$7)', [rating, reviewText, created_at, updated_at, active, user_id, restaurant_id]);
-        console.log("Inserting review, successfully.");
-        client.release();
-    } catch (err) {
-        console.log("Inserting review, failed.");
-        console.error(err);
-    }
-}
-
-//insertUser("Username", "leeeet1337@mail", "bestpassord", 1, timestamp, timestamp, 1 )
-
-async function insertUser(username,email,password, role, created_at, updated_at, active) {
-    try {
-        const client = await pool.connect()
-        const result = await client.query('INSERT INTO users (username,email,password, role, created_at, updated_at, active)  VALUES($1,$2,$3,$4,$5,$6,$7)', [username,email,password, role, created_at, updated_at, active]);
-        console.log("Inserting user, successfully.");
-        client.release();
-    } catch (err) {
-        console.log("Inserting user, failed.");
-        console.error(err);
-    }
-}
-
-
 app.get('/data', (req, res) => {
  res.json(pets)
 });
@@ -159,3 +104,8 @@ app.use("/static",
         express.static('resources'));
 
 app.listen(process.env.PORT || 8080)
+
+
+module.exports = {
+    pool
+}
